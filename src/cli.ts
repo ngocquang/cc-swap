@@ -1,6 +1,14 @@
 import { Command } from "commander";
+import { spawnSync } from "node:child_process";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
+
+function launchClaude(): void {
+  if (process.env.CC_SWITCH_NO_LAUNCH) return;
+  console.log("Launching Claude Code...\n");
+  const result = spawnSync("claude", [], { stdio: "inherit" });
+  process.exit(result.status ?? 0);
+}
 import {
   CLAUDE_DIR,
   CC_SWITCH_DIR,
@@ -48,6 +56,7 @@ program.action(async () => {
     currentFile: CURRENT_FILE,
   });
   console.log(`Switched: ${current} → ${next}`);
+  launchClaude();
 });
 
 program
@@ -79,6 +88,9 @@ program
         currentFile: CURRENT_FILE,
       });
       console.log(msg);
+      if (!msg.includes("already active")) {
+        launchClaude();
+      }
     } catch (err: unknown) {
       console.error(`Error: ${(err as Error).message}`);
       process.exit(1);

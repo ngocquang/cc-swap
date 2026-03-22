@@ -23,6 +23,7 @@ describe("CLI integration", () => {
     testEnv = {
       CC_SWITCH_HOME: tmp,
       CC_SWITCH_CLAUDE_DIR: path.join(tmp, ".claude"),
+      CC_SWITCH_NO_LAUNCH: "1",
     };
   });
 
