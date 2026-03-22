@@ -67,6 +67,24 @@ rm settings.json                           # Remove the symlink
 cp ~/.claude/settings.json settings.json   # Copy and customize
 ```
 
+### Configuration
+
+`~/.cc-switch/config.json` is auto-created on first use. Edit it to customize:
+
+```json
+{
+  "syncItems": [
+    "agents", "commands", "file-history", "hooks", "plugins",
+    "projects", "rules", "session-env", "sessions",
+    "settings.json", "skills", "tasks"
+  ],
+  "autoContinue": true
+}
+```
+
+- **syncItems** — folders/files symlinked when creating an account. Add or remove items as needed.
+- **autoContinue** — `true`: launch with `claude --continue` (resume session). `false`: launch fresh `claude`.
+
 ---
 
 ## Tiếng Việt
@@ -129,6 +147,24 @@ cd ~/.cc-switch/claude-accounts/work
 rm settings.json                           # Xóa symlink
 cp ~/.claude/settings.json settings.json   # Copy và chỉnh sửa
 ```
+
+### Cấu hình
+
+`~/.cc-switch/config.json` được tự động tạo khi sử dụng lần đầu. Chỉnh sửa để tùy chỉnh:
+
+```json
+{
+  "syncItems": [
+    "agents", "commands", "file-history", "hooks", "plugins",
+    "projects", "rules", "session-env", "sessions",
+    "settings.json", "skills", "tasks"
+  ],
+  "autoContinue": true
+}
+```
+
+- **syncItems** — các folders/files được symlink khi tạo account. Thêm hoặc bớt tùy ý.
+- **autoContinue** — `true`: chạy `claude --continue` (tiếp tục session). `false`: chạy `claude` mới.
 
 ---
 
@@ -193,6 +229,24 @@ rm settings.json                           # シンボリックリンクを削�
 cp ~/.claude/settings.json settings.json   # コピーして編集
 ```
 
+### 設定
+
+`~/.cc-switch/config.json`は初回使用時に自動作成されます。編集してカスタマイズ：
+
+```json
+{
+  "syncItems": [
+    "agents", "commands", "file-history", "hooks", "plugins",
+    "projects", "rules", "session-env", "sessions",
+    "settings.json", "skills", "tasks"
+  ],
+  "autoContinue": true
+}
+```
+
+- **syncItems** — アカウント作成時にシンボリックリンクされるフォルダ/ファイル。自由に追加・削除可能。
+- **autoContinue** — `true`: `claude --continue`で起動（セッション再開）。`false`: 新規`claude`で起動。
+
 ---
 
 ## 한국어
@@ -256,6 +310,24 @@ rm settings.json                           # 심볼릭 링크 삭제
 cp ~/.claude/settings.json settings.json   # 복사 후 편집
 ```
 
+### 설정
+
+`~/.cc-switch/config.json`은 처음 사용할 때 자동으로 생성됩니다. 편집하여 커스터마이징:
+
+```json
+{
+  "syncItems": [
+    "agents", "commands", "file-history", "hooks", "plugins",
+    "projects", "rules", "session-env", "sessions",
+    "settings.json", "skills", "tasks"
+  ],
+  "autoContinue": true
+}
+```
+
+- **syncItems** — 계정 생성 시 심볼릭 링크되는 폴더/파일. 자유롭게 추가・삭제 가능.
+- **autoContinue** — `true`: `claude --continue`로 실행 (세션 재개). `false`: 새 `claude`로 실행.
+
 ---
 
 ## 中文
@@ -318,6 +390,24 @@ cd ~/.cc-switch/claude-accounts/work
 rm settings.json                           # 删除符号链接
 cp ~/.claude/settings.json settings.json   # 复制并编辑
 ```
+
+### 配置
+
+`~/.cc-switch/config.json` 在首次使用时自动创建。编辑以自定义：
+
+```json
+{
+  "syncItems": [
+    "agents", "commands", "file-history", "hooks", "plugins",
+    "projects", "rules", "session-env", "sessions",
+    "settings.json", "skills", "tasks"
+  ],
+  "autoContinue": true
+}
+```
+
+- **syncItems** — 创建账户时进行符号链接的文件夹/文件。可自由添加或删除。
+- **autoContinue** — `true`：以 `claude --continue` 启动（恢复会话）。`false`：启动新的 `claude`。
 
 ---
 

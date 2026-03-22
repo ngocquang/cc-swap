@@ -155,13 +155,4 @@ program
     }
   });
 
-program
-  .command("config")
-  .description("Show or edit config")
-  .action(async () => {
-    const config = await loadConfig(CONFIG_FILE);
-    console.log(JSON.stringify(config, null, 2));
-    console.log(`\nConfig file: ${CONFIG_FILE}`);
-  });
-
 program.parseAsync();
