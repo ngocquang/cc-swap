@@ -4,11 +4,10 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 
-const CLI = path.resolve("src/cli.ts");
-const TSX = path.resolve("node_modules/.bin/tsx");
+const CLI = path.resolve("dist/cli.js");
 
 function run(args: string[], env: Record<string, string> = {}): string {
-  return execFileSync(TSX, [CLI, ...args], {
+  return execFileSync(process.execPath, [CLI, ...args], {
     cwd: path.resolve("."),
     env: { ...process.env, ...env },
     encoding: "utf-8",
