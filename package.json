@@ -1,0 +1,31 @@
+{
+  "name": "cc-switch",
+  "version": "0.1.0",
+  "description": "Switch between multiple Claude Code accounts using symlinks",
+  "type": "module",
+  "bin": {
+    "cc-switch": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "account-switcher"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
+  },
+  "dependencies": {
+    "commander": "^14.0.3"
+  }
+}
