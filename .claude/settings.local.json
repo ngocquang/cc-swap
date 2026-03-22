@@ -20,7 +20,8 @@
       "WebFetch(domain:mcp.vercel.com)",
       "WebFetch(domain:http-intake.logs.us5.datadoghq.com)",
       "WebFetch(domain:mcp-proxy.anthropic.com)",
-      "Bash(gh repo:*)"
+      "Bash(gh repo:*)",
+      "WebFetch(domain:github.com)"
     ]
   },
   "sandbox": {

@@ -1,6 +1,6 @@
 {
   "name": "cc-swap",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Switch between multiple Claude Code accounts using symlinks",
   "type": "module",
   "bin": {
