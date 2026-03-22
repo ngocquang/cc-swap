@@ -21,8 +21,8 @@ interface TestEnv {
 }
 
 function makeTmpEnv(): TestEnv {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "cc-switch-test-"));
-  const ccSwitchDir = path.join(tmp, ".cc-switch");
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "cc-swap-test-"));
+  const ccSwitchDir = path.join(tmp, ".cc-swap");
   const accountsDir = path.join(ccSwitchDir, "claude-accounts");
   const currentFile = path.join(ccSwitchDir, ".current");
   const claudeDir = path.join(tmp, ".claude");

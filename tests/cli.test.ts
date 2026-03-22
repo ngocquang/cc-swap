@@ -19,7 +19,7 @@ describe("CLI integration", () => {
   let testEnv: Record<string, string>;
 
   beforeEach(() => {
-    tmp = fs.mkdtempSync(path.join(os.tmpdir(), "cc-switch-cli-"));
+    tmp = fs.mkdtempSync(path.join(os.tmpdir(), "cc-swap-cli-"));
     // Create fake ~/.claude with some items
     const claudeDir = path.join(tmp, ".claude");
     fs.mkdirSync(claudeDir);
@@ -27,9 +27,9 @@ describe("CLI integration", () => {
     fs.writeFileSync(path.join(claudeDir, "settings.json"), "{}");
 
     testEnv = {
-      CC_SWITCH_HOME: tmp,
-      CC_SWITCH_CLAUDE_DIR: claudeDir,
-      CC_SWITCH_NO_LAUNCH: "1",
+      CC_SWAP_HOME: tmp,
+      CC_SWAP_CLAUDE_DIR: claudeDir,
+      CC_SWAP_NO_LAUNCH: "1",
     };
   });
 

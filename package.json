@@ -1,10 +1,10 @@
 {
-  "name": "cc-switch",
+  "name": "cc-swap",
   "version": "0.1.0",
   "description": "Switch between multiple Claude Code accounts using symlinks",
   "type": "module",
   "bin": {
-    "cc-switch": "./dist/cli.js"
+    "cc-swap": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsup",

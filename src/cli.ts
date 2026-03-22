@@ -5,7 +5,7 @@ import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import {
   CLAUDE_DIR,
-  CC_SWITCH_DIR,
+  CC_SWAP_DIR,
   ACCOUNTS_DIR,
   CURRENT_FILE,
   CONFIG_FILE,
@@ -21,7 +21,7 @@ import { readCurrent } from "./symlink.js";
 import { loadConfig, type Config } from "./items.js";
 
 function launchClaude(accountDir: string, config: Config): void {
-  if (process.env.CC_SWITCH_NO_LAUNCH) return;
+  if (process.env.CC_SWAP_NO_LAUNCH) return;
   const args = config.autoContinue ? ["--continue"] : [];
   console.log(`Launching Claude Code (config: ${accountDir})...\n`);
   const result = spawnSync("claude", args, {
@@ -34,7 +34,7 @@ function launchClaude(accountDir: string, config: Config): void {
 const program = new Command();
 
 program
-  .name("cc-switch")
+  .name("cc-swap")
   .description("Switch between multiple Claude Code accounts")
   .version("0.1.0");
 
@@ -43,13 +43,13 @@ program.action(async () => {
   const config = await loadConfig(CONFIG_FILE);
   const accounts = await listAccounts(ACCOUNTS_DIR);
   if (accounts.length === 0) {
-    console.log("No accounts found. Run 'cc-switch add <name>' to get started.");
+    console.log("No accounts found. Run 'cc-swap add <name>' to get started.");
     return;
   }
 
   const current = await readCurrent(CURRENT_FILE);
   if (!current) {
-    console.log("No active account. Run 'cc-switch switch <name>' to activate one.");
+    console.log("No active account. Run 'cc-swap switch <name>' to activate one.");
     return;
   }
 
@@ -77,7 +77,7 @@ program
       const config = await loadConfig(CONFIG_FILE);
       await addAccount(name, {
         claudeDir: CLAUDE_DIR,
-        ccSwitchDir: CC_SWITCH_DIR,
+        ccSwitchDir: CC_SWAP_DIR,
         accountsDir: ACCOUNTS_DIR,
         currentFile: CURRENT_FILE,
         syncItems: config.syncItems,
@@ -116,7 +116,7 @@ program
   .action(async () => {
     const accounts = await listAccounts(ACCOUNTS_DIR);
     if (accounts.length === 0) {
-      console.log("No accounts found. Run 'cc-switch add <name>' to get started.");
+      console.log("No accounts found. Run 'cc-swap add <name>' to get started.");
       return;
     }
     const current = await readCurrent(CURRENT_FILE);

@@ -9,7 +9,7 @@ import { DEFAULT_ITEMS } from "../src/items.js";
 const TEST_ITEMS = [...DEFAULT_ITEMS];
 
 function makeTmpDir() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), "cc-switch-test-"));
+  return fs.mkdtempSync(path.join(os.tmpdir(), "cc-swap-test-"));
 }
 
 describe("populateAccount", () => {
