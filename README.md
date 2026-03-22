@@ -15,7 +15,7 @@ Switch between multiple Claude Code accounts instantly.
 ### How it works
 
 ```
-~/.claude/                    ← Config gốc (never modified)
+~/.claude/                    ← Base config (never modified)
 ~/.cc-swap/accounts/
 ├── work/                     ← Symlinks to ~/.claude
 └── personal/                 ← Symlinks to ~/.claude
@@ -155,7 +155,7 @@ cc-swap list
 ### 仕組み
 
 ```
-~/.claude/                    ← Config gốc（変更されません）
+~/.claude/                    ← 基本設定（変更されません）
 ~/.cc-swap/accounts/
 ├── work/                     ← ~/.claudeへのシンボリックリンク
 └── personal/                 ← ~/.claudeへのシンボリックリンク
@@ -225,7 +225,7 @@ cc-swap list
 ### 작동 방식
 
 ```
-~/.claude/                    ← Config gốc (수정되지 않음)
+~/.claude/                    ← 기본 설정 (수정되지 않음)
 ~/.cc-swap/accounts/
 ├── work/                     ← ~/.claude로의 심볼릭 링크
 └── personal/                 ← ~/.claude로의 심볼릭 링크
@@ -295,7 +295,7 @@ cc-swap list
 ### 工作原理
 
 ```
-~/.claude/                    ← Config gốc（永不修改）
+~/.claude/                    ← 基础配置（永不修改）
 ~/.cc-swap/accounts/
 ├── work/                     ← 指向 ~/.claude 的符号链接
 └── personal/                 ← 指向 ~/.claude 的符号链接
