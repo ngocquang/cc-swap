@@ -51,7 +51,9 @@ program.action(async () => {
 
   const next = nextAccount(current, accounts);
   if (!next) {
-    console.log(`Only one account ('${current}'). Add another with 'cc-switch add <name>'.`);
+    // Only 1 account — just launch it
+    console.log(`Using account: ${current}`);
+    launchClaude(path.join(ACCOUNTS_DIR, current));
     return;
   }
 
