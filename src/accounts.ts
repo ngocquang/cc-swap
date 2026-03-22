@@ -1,7 +1,7 @@
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 import { validateName } from "./validate.js";
-import { atomicSwap, readCurrent, writeCurrent } from "./symlink.js";
+import { switchItems, moveItemsToAccount, readCurrent, writeCurrent } from "./symlink.js";
 
 interface AccountPaths {
   claudeDir: string;
@@ -47,31 +47,16 @@ export async function addAccount(name: string, paths: AccountPaths): Promise<voi
     }
 
     const defaultDir = path.join(accountsDir, "default");
-    let claudeExists = false;
-    let claudeIsSymlink = false;
 
-    try {
-      const stat = await fsPromises.lstat(claudeDir);
-      claudeExists = true;
-      claudeIsSymlink = stat.isSymbolicLink();
-    } catch {
-      claudeExists = false;
-    }
+    // Move real items from ~/.claude into default account
+    await moveItemsToAccount(claudeDir, defaultDir);
 
-    if (claudeExists && claudeIsSymlink) {
-      throw new Error(
-        "~/.claude is already a symlink. cc-switch may already be set up, or another tool manages it."
-      );
-    }
+    // Create symlinks from ~/.claude/<item> → default/<item>
+    await switchItems(claudeDir, defaultDir);
 
-    if (claudeExists) {
-      await fsPromises.rename(claudeDir, defaultDir);
-    } else {
-      await fsPromises.mkdir(defaultDir, { mode: 0o700 });
-    }
-
-    await fsPromises.symlink(defaultDir, claudeDir);
     await writeCurrent(currentFile, "default");
+
+    // Create empty new account directory
     await fsPromises.mkdir(path.join(accountsDir, name), { mode: 0o700 });
   } else {
     const target = path.join(accountsDir, name);
@@ -94,12 +79,8 @@ export async function switchAccount(
   const current = await readCurrent(currentFile);
   if (current === name) return `'${name}' is already active`;
 
-  const resolved = path.resolve(target);
-  if (!resolved.startsWith(path.resolve(accountsDir) + path.sep)) {
-    throw new Error("Invalid account path");
-  }
-
-  await atomicSwap(claudeDir, target);
+  // Switch all items inside ~/.claude to point to the new account
+  await switchItems(claudeDir, target);
   await writeCurrent(currentFile, name);
   return `Switched to: ${name}`;
 }

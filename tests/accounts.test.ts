@@ -64,30 +64,41 @@ describe("addAccount - first time", () => {
   beforeEach(() => { env = makeTmpEnv(); });
   afterEach(() => { fs.rmSync(env.tmp, { recursive: true, force: true }); });
 
-  it("moves real ~/.claude to default, creates new account", async () => {
+  it("moves items from ~/.claude to default account, creates symlinks", async () => {
     fs.mkdirSync(env.claudeDir);
-    fs.writeFileSync(path.join(env.claudeDir, "config.json"), "{}");
+    fs.mkdirSync(path.join(env.claudeDir, "hooks"));
+    fs.writeFileSync(path.join(env.claudeDir, "hooks", "test.sh"), "#!/bin/bash");
+    fs.writeFileSync(path.join(env.claudeDir, "settings.json"), '{"key":"val"}');
 
     await addAccount("work", env);
 
-    expect(fs.existsSync(path.join(env.accountsDir, "default", "config.json"))).toBe(true);
-    expect(fs.readlinkSync(env.claudeDir)).toBe(path.join(env.accountsDir, "default"));
+    // Items moved to default account
+    expect(fs.existsSync(path.join(env.accountsDir, "default", "hooks", "test.sh"))).toBe(true);
+    expect(fs.existsSync(path.join(env.accountsDir, "default", "settings.json"))).toBe(true);
+
+    // ~/.claude still exists as real dir (NOT symlink)
+    expect(fs.lstatSync(env.claudeDir).isDirectory()).toBe(true);
+    expect(fs.lstatSync(env.claudeDir).isSymbolicLink()).toBe(false);
+
+    // Items inside ~/.claude are now symlinks
+    expect(fs.readlinkSync(path.join(env.claudeDir, "hooks"))).toBe(
+      path.join(env.accountsDir, "default", "hooks")
+    );
+    expect(fs.readlinkSync(path.join(env.claudeDir, "settings.json"))).toBe(
+      path.join(env.accountsDir, "default", "settings.json")
+    );
+
+    // New account dir exists
     expect(fs.existsSync(path.join(env.accountsDir, "work"))).toBe(true);
+
+    // .current = default
     expect((await fsPromises.readFile(env.currentFile, "utf-8")).trim()).toBe("default");
   });
 
-  it("creates empty default if ~/.claude does not exist", async () => {
+  it("works when ~/.claude does not exist", async () => {
     await addAccount("work", env);
-
     expect(fs.existsSync(path.join(env.accountsDir, "default"))).toBe(true);
-    expect(fs.readlinkSync(env.claudeDir)).toBe(path.join(env.accountsDir, "default"));
-  });
-
-  it("throws if ~/.claude is already a symlink", async () => {
-    fs.mkdirSync(path.join(env.tmp, "somewhere"));
-    fs.symlinkSync(path.join(env.tmp, "somewhere"), env.claudeDir);
-
-    await expect(addAccount("work", env)).rejects.toThrow(/already a symlink/i);
+    expect(fs.existsSync(path.join(env.accountsDir, "work"))).toBe(true);
   });
 
   it("rejects name 'default'", async () => {
@@ -102,7 +113,7 @@ describe("addAccount - subsequent", () => {
     env = makeTmpEnv();
     fs.mkdirSync(env.accountsDir, { recursive: true });
     fs.mkdirSync(path.join(env.accountsDir, "default"));
-    fs.symlinkSync(path.join(env.accountsDir, "default"), env.claudeDir);
+    fs.mkdirSync(env.claudeDir);
     await fsPromises.writeFile(env.currentFile, "default\n");
   });
 
@@ -125,17 +136,35 @@ describe("switchAccount", () => {
   beforeEach(async () => {
     env = makeTmpEnv();
     fs.mkdirSync(env.accountsDir, { recursive: true });
-    fs.mkdirSync(path.join(env.accountsDir, "default"));
-    fs.mkdirSync(path.join(env.accountsDir, "work"));
-    fs.symlinkSync(path.join(env.accountsDir, "default"), env.claudeDir);
+    fs.mkdirSync(env.claudeDir);
+
+    // Setup default account with hooks
+    const defaultDir = path.join(env.accountsDir, "default");
+    fs.mkdirSync(defaultDir);
+    fs.mkdirSync(path.join(defaultDir, "hooks"));
+
+    // Setup work account with hooks + plugins
+    const workDir = path.join(env.accountsDir, "work");
+    fs.mkdirSync(workDir);
+    fs.mkdirSync(path.join(workDir, "hooks"));
+    fs.mkdirSync(path.join(workDir, "plugins"));
+
+    // Current symlinks point to default
+    fs.symlinkSync(path.join(defaultDir, "hooks"), path.join(env.claudeDir, "hooks"));
     await fsPromises.writeFile(env.currentFile, "default\n");
   });
 
   afterEach(() => { fs.rmSync(env.tmp, { recursive: true, force: true }); });
 
-  it("switches symlink to target account", async () => {
+  it("switches item symlinks to target account", async () => {
     await switchAccount("work", env);
-    expect(fs.readlinkSync(env.claudeDir)).toBe(path.join(env.accountsDir, "work"));
+
+    expect(fs.readlinkSync(path.join(env.claudeDir, "hooks"))).toBe(
+      path.join(env.accountsDir, "work", "hooks")
+    );
+    expect(fs.readlinkSync(path.join(env.claudeDir, "plugins"))).toBe(
+      path.join(env.accountsDir, "work", "plugins")
+    );
     expect((await fsPromises.readFile(env.currentFile, "utf-8")).trim()).toBe("work");
   });
 
@@ -146,25 +175,6 @@ describe("switchAccount", () => {
   it("returns already-active message when switching to current", async () => {
     const result = await switchAccount("default", env);
     expect(result).toMatch(/already active/i);
-  });
-});
-
-describe("switchAccount - stale .current", () => {
-  let env: TestEnv;
-
-  beforeEach(async () => {
-    env = makeTmpEnv();
-    fs.mkdirSync(env.accountsDir, { recursive: true });
-    fs.mkdirSync(path.join(env.accountsDir, "work"));
-    fs.symlinkSync(path.join(env.accountsDir, "work"), env.claudeDir);
-    await fsPromises.writeFile(env.currentFile, "deleted\n");
-  });
-
-  afterEach(() => { fs.rmSync(env.tmp, { recursive: true, force: true }); });
-
-  it("can still switch to a valid account even with stale .current", async () => {
-    await switchAccount("work", env);
-    expect(fs.readlinkSync(env.claudeDir)).toBe(path.join(env.accountsDir, "work"));
   });
 });
 
@@ -190,7 +200,7 @@ describe("removeAccount", () => {
     fs.mkdirSync(env.accountsDir, { recursive: true });
     fs.mkdirSync(path.join(env.accountsDir, "default"));
     fs.mkdirSync(path.join(env.accountsDir, "work"));
-    fs.symlinkSync(path.join(env.accountsDir, "default"), env.claudeDir);
+    fs.mkdirSync(env.claudeDir);
     await fsPromises.writeFile(env.currentFile, "default\n");
   });
 
