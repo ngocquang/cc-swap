@@ -8,6 +8,7 @@ import {
   CC_SWITCH_DIR,
   ACCOUNTS_DIR,
   CURRENT_FILE,
+  CONFIG_FILE,
 } from "./paths.js";
 import {
   listAccounts,
@@ -17,11 +18,13 @@ import {
   nextAccount,
 } from "./accounts.js";
 import { readCurrent } from "./symlink.js";
+import { loadConfig, saveConfig, DEFAULT_ITEMS, type Config } from "./items.js";
 
-function launchClaude(accountDir: string): void {
+function launchClaude(accountDir: string, config: Config): void {
   if (process.env.CC_SWITCH_NO_LAUNCH) return;
+  const args = config.autoContinue ? ["--continue"] : [];
   console.log(`Launching Claude Code (config: ${accountDir})...\n`);
-  const result = spawnSync("claude", ["--continue"], {
+  const result = spawnSync("claude", args, {
     stdio: "inherit",
     env: { ...process.env, CLAUDE_CONFIG_DIR: accountDir },
   });
@@ -37,6 +40,7 @@ program
 
 // Default action (no subcommand) → round-robin to next account + launch
 program.action(async () => {
+  const config = await loadConfig(CONFIG_FILE);
   const accounts = await listAccounts(ACCOUNTS_DIR);
   if (accounts.length === 0) {
     console.log("No accounts found. Run 'cc-switch add <name>' to get started.");
@@ -51,9 +55,8 @@ program.action(async () => {
 
   const next = nextAccount(current, accounts);
   if (!next) {
-    // Only 1 account — just launch it
     console.log(`Using account: ${current}`);
-    launchClaude(path.join(ACCOUNTS_DIR, current));
+    launchClaude(path.join(ACCOUNTS_DIR, current), config);
     return;
   }
 
@@ -63,7 +66,7 @@ program.action(async () => {
     currentFile: CURRENT_FILE,
   });
   console.log(`Switched: ${current} → ${next}`);
-  launchClaude(path.join(ACCOUNTS_DIR, next));
+  launchClaude(path.join(ACCOUNTS_DIR, next), config);
 });
 
 program
@@ -71,11 +74,13 @@ program
   .description("Add a new account (populated with symlinks to ~/.claude)")
   .action(async (name: string) => {
     try {
+      const config = await loadConfig(CONFIG_FILE);
       await addAccount(name, {
         claudeDir: CLAUDE_DIR,
         ccSwitchDir: CC_SWITCH_DIR,
         accountsDir: ACCOUNTS_DIR,
         currentFile: CURRENT_FILE,
+        syncItems: config.syncItems,
       });
       console.log(`Added account '${name}'.`);
     } catch (err: unknown) {
@@ -89,6 +94,7 @@ program
   .description("Switch to a specific account and launch Claude Code")
   .action(async (name: string) => {
     try {
+      const config = await loadConfig(CONFIG_FILE);
       const msg = await switchAccount(name, {
         claudeDir: CLAUDE_DIR,
         accountsDir: ACCOUNTS_DIR,
@@ -96,7 +102,7 @@ program
       });
       console.log(msg);
       if (!msg.includes("already active")) {
-        launchClaude(path.join(ACCOUNTS_DIR, name));
+        launchClaude(path.join(ACCOUNTS_DIR, name), config);
       }
     } catch (err: unknown) {
       console.error(`Error: ${(err as Error).message}`);
@@ -147,6 +153,25 @@ program
       console.error(`Error: ${(err as Error).message}`);
       process.exit(1);
     }
+  });
+
+program
+  .command("config")
+  .description("Show or edit config")
+  .action(async () => {
+    const config = await loadConfig(CONFIG_FILE);
+    console.log(JSON.stringify(config, null, 2));
+    console.log(`\nConfig file: ${CONFIG_FILE}`);
+  });
+
+program
+  .command("init")
+  .description("Create default config.json")
+  .action(async () => {
+    const config = { syncItems: [...DEFAULT_ITEMS], autoContinue: true };
+    await saveConfig(CONFIG_FILE, config);
+    console.log(`Config created: ${CONFIG_FILE}`);
+    console.log(JSON.stringify(config, null, 2));
   });
 
 program.parseAsync();

@@ -8,3 +8,4 @@ export const CLAUDE_DIR = process.env.CC_SWITCH_CLAUDE_DIR ?? join(HOME, ".claud
 export const CC_SWITCH_DIR = join(HOME, ".cc-switch");
 export const ACCOUNTS_DIR = join(CC_SWITCH_DIR, "claude-accounts");
 export const CURRENT_FILE = join(CC_SWITCH_DIR, ".current");
+export const CONFIG_FILE = join(CC_SWITCH_DIR, "config.json");

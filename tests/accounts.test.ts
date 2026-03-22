@@ -10,6 +10,7 @@ import {
   removeAccount,
   nextAccount,
 } from "../src/accounts.js";
+import { DEFAULT_ITEMS } from "../src/items.js";
 
 interface TestEnv {
   tmp: string;
@@ -25,7 +26,7 @@ function makeTmpEnv(): TestEnv {
   const accountsDir = path.join(ccSwitchDir, "claude-accounts");
   const currentFile = path.join(ccSwitchDir, ".current");
   const claudeDir = path.join(tmp, ".claude");
-  return { tmp, ccSwitchDir, accountsDir, currentFile, claudeDir };
+  return { tmp, ccSwitchDir, accountsDir, currentFile, claudeDir, syncItems: [...DEFAULT_ITEMS] };
 }
 
 describe("listAccounts", () => {

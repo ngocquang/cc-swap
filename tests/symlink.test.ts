@@ -4,6 +4,9 @@ import fsPromises from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { populateAccount, readCurrent, writeCurrent } from "../src/symlink.js";
+import { DEFAULT_ITEMS } from "../src/items.js";
+
+const TEST_ITEMS = [...DEFAULT_ITEMS];
 
 function makeTmpDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "cc-switch-test-"));
@@ -29,7 +32,7 @@ describe("populateAccount", () => {
     fs.mkdirSync(path.join(claudeDir, "hooks"));
     fs.mkdirSync(path.join(claudeDir, "plugins"));
 
-    await populateAccount(claudeDir, accountDir);
+    await populateAccount(claudeDir, accountDir, TEST_ITEMS);
 
     // Account items are symlinks pointing to ~/.claude
     expect(fs.readlinkSync(path.join(accountDir, "hooks"))).toBe(path.join(claudeDir, "hooks"));
@@ -40,7 +43,7 @@ describe("populateAccount", () => {
     fs.mkdirSync(path.join(claudeDir, "hooks"));
     // "plugins" does not exist in claudeDir
 
-    await populateAccount(claudeDir, accountDir);
+    await populateAccount(claudeDir, accountDir, TEST_ITEMS);
 
     expect(fs.existsSync(path.join(accountDir, "plugins"))).toBe(false);
     expect(fs.readlinkSync(path.join(accountDir, "hooks"))).toBe(path.join(claudeDir, "hooks"));
@@ -53,7 +56,7 @@ describe("populateAccount", () => {
     fs.mkdirSync(path.join(accountDir, "hooks"));
     fs.writeFileSync(path.join(accountDir, "hooks", "custom.sh"), "#!/bin/bash");
 
-    await populateAccount(claudeDir, accountDir);
+    await populateAccount(claudeDir, accountDir, TEST_ITEMS);
 
     // Should NOT be a symlink — the custom override is preserved
     expect(fs.lstatSync(path.join(accountDir, "hooks")).isSymbolicLink()).toBe(false);
@@ -63,7 +66,7 @@ describe("populateAccount", () => {
   it("handles settings.json as file symlink", async () => {
     fs.writeFileSync(path.join(claudeDir, "settings.json"), '{"test":true}');
 
-    await populateAccount(claudeDir, accountDir);
+    await populateAccount(claudeDir, accountDir, TEST_ITEMS);
 
     expect(fs.readlinkSync(path.join(accountDir, "settings.json"))).toBe(
       path.join(claudeDir, "settings.json")
@@ -73,7 +76,7 @@ describe("populateAccount", () => {
   it("creates account dir if it does not exist", async () => {
     fs.mkdirSync(path.join(claudeDir, "hooks"));
 
-    await populateAccount(claudeDir, accountDir);
+    await populateAccount(claudeDir, accountDir, TEST_ITEMS);
 
     expect(fs.existsSync(accountDir)).toBe(true);
   });
@@ -82,7 +85,7 @@ describe("populateAccount", () => {
     fs.mkdirSync(path.join(claudeDir, "hooks"));
     fs.writeFileSync(path.join(claudeDir, "settings.json"), "{}");
 
-    await populateAccount(claudeDir, accountDir);
+    await populateAccount(claudeDir, accountDir, TEST_ITEMS);
 
     // ~/.claude items are still real, not symlinks
     expect(fs.lstatSync(path.join(claudeDir, "hooks")).isSymbolicLink()).toBe(false);

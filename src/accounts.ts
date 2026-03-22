@@ -8,6 +8,7 @@ interface AccountPaths {
   ccSwitchDir?: string;
   accountsDir: string;
   currentFile: string;
+  syncItems?: string[];
 }
 
 export async function listAccounts(accountsDir: string): Promise<string[]> {
@@ -48,7 +49,7 @@ export async function addAccount(name: string, paths: AccountPaths): Promise<voi
   if (exists) throw new Error(`Account '${name}' already exists`);
 
   // Create account dir with symlinks pointing back to ~/.claude
-  await populateAccount(claudeDir, target);
+  await populateAccount(claudeDir, target, paths.syncItems ?? []);
 
   // Set as current if this is the first account
   const current = await readCurrent(currentFile);
