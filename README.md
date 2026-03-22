@@ -10,7 +10,7 @@ Switch between multiple Claude Code accounts instantly.
 
 ### What is cc-swap?
 
-`cc-swap` lets you run multiple Claude Code accounts on one machine. Each account has its own settings, plugins, and session history — while sharing your base `~/.claude` config.
+`cc-swap` lets you run multiple Claude Code accounts on one machine. All accounts share the same settings, plugins, and sessions via symlinks to `~/.claude` — only the OAuth credentials are separate.
 
 ### How it works
 
@@ -80,7 +80,7 @@ cc-swap list
 
 ### cc-swap là gì?
 
-`cc-swap` cho phép bạn chạy nhiều tài khoản Claude Code trên cùng một máy. Mỗi tài khoản có settings, plugins và lịch sử session riêng — trong khi vẫn dùng chung config gốc từ `~/.claude`.
+`cc-swap` cho phép bạn chạy nhiều tài khoản Claude Code trên cùng một máy. Tất cả account dùng chung settings, plugins và sessions qua symlink từ `~/.claude` — chỉ OAuth credentials là riêng biệt.
 
 ### Cách hoạt động
 
@@ -150,7 +150,7 @@ cc-swap list
 
 ### cc-swapとは？
 
-`cc-swap`を使えば、1台のマシンで複数のClaude Codeアカウントを切り替えられます。各アカウントは独自のsettings、plugins、セッション履歴を持ちながら、`~/.claude`の基本設定を共有します。
+`cc-swap`を使えば、1台のマシンで複数のClaude Codeアカウントを切り替えられます。すべてのアカウントは`~/.claude`へのシンボリックリンクでsettings、plugins、セッションを共有し、OAuth認証情報のみ個別に管理されます。
 
 ### 仕組み
 
@@ -220,7 +220,7 @@ cc-swap list
 
 ### cc-swap란?
 
-`cc-swap`를 사용하면 한 컴퓨터에서 여러 Claude Code 계정을 전환할 수 있습니다. 각 계정은 고유한 settings, plugins, 세션 기록을 가지면서 `~/.claude`의 기본 설정을 공유합니다.
+`cc-swap`를 사용하면 한 컴퓨터에서 여러 Claude Code 계정을 전환할 수 있습니다. 모든 계정은 `~/.claude`로의 심볼릭 링크를 통해 settings, plugins, 세션을 공유하며, OAuth 인증 정보만 개별적으로 관리됩니다.
 
 ### 작동 방식
 
@@ -290,7 +290,7 @@ cc-swap list
 
 ### 什么是 cc-swap？
 
-`cc-swap` 让你在一台电脑上运行多个 Claude Code 账户。每个账户拥有独立的 settings、plugins 和会话记录，同时共享 `~/.claude` 的基础配置。
+`cc-swap` 让你在一台电脑上运行多个 Claude Code 账户。所有账户通过符号链接共享 `~/.claude` 的 settings、plugins 和会话，仅 OAuth 凭证独立管理。
 
 ### 工作原理
 
