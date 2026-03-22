@@ -17,8 +17,8 @@ Switch between multiple Claude Code accounts instantly.
 ```
 ~/.claude/                    ← Your base config (never modified)
 ~/.cc-swap/accounts/
-├── work/                     ← Symlinks to ~/.claude + custom overrides
-└── personal/                 ← Symlinks to ~/.claude + custom overrides
+├── work/                     ← Symlinks to ~/.claude
+└── personal/                 ← Symlinks to ~/.claude
 ```
 
 When you switch, `cc-swap` launches Claude Code with `CLAUDE_CONFIG_DIR` pointing to your account folder.
@@ -56,17 +56,6 @@ cc-swap list
 | `cc-swap list` | Show all accounts |
 | `cc-swap remove <name>` | Delete an account |
 
-### Custom overrides
-
-By default, each account shares everything with `~/.claude`. To customize an account:
-
-```bash
-# Example: custom settings for "work" account
-cd ~/.cc-swap/claude-accounts/work
-rm settings.json                           # Remove the symlink
-cp ~/.claude/settings.json settings.json   # Copy and customize
-```
-
 ### Configuration
 
 `~/.cc-swap/config.json` is auto-created on first use. Edit it to customize:
@@ -98,8 +87,8 @@ cp ~/.claude/settings.json settings.json   # Copy and customize
 ```
 ~/.claude/                    ← Config gốc (không bao giờ bị sửa)
 ~/.cc-swap/accounts/
-├── work/                     ← Symlinks trỏ về ~/.claude + file riêng
-└── personal/                 ← Symlinks trỏ về ~/.claude + file riêng
+├── work/                     ← Symlinks trỏ về ~/.claude
+└── personal/                 ← Symlinks trỏ về ~/.claude
 ```
 
 Khi switch, `cc-swap` khởi chạy Claude Code với `CLAUDE_CONFIG_DIR` trỏ đến thư mục account.
@@ -137,17 +126,6 @@ cc-swap list
 | `cc-swap list` | Hiển thị tất cả accounts |
 | `cc-swap remove <tên>` | Xóa account |
 
-### Tùy chỉnh riêng cho từng account
-
-Mặc định, mỗi account dùng chung mọi thứ với `~/.claude`. Để tùy chỉnh:
-
-```bash
-# Ví dụ: settings riêng cho account "work"
-cd ~/.cc-swap/claude-accounts/work
-rm settings.json                           # Xóa symlink
-cp ~/.claude/settings.json settings.json   # Copy và chỉnh sửa
-```
-
 ### Cấu hình
 
 `~/.cc-swap/config.json` được tự động tạo khi sử dụng lần đầu. Chỉnh sửa để tùy chỉnh:
@@ -179,8 +157,8 @@ cp ~/.claude/settings.json settings.json   # Copy và chỉnh sửa
 ```
 ~/.claude/                    ← 基本設定（変更されません）
 ~/.cc-swap/accounts/
-├── work/                     ← ~/.claudeへのシンボリックリンク + カスタム設定
-└── personal/                 ← ~/.claudeへのシンボリックリンク + カスタム設定
+├── work/                     ← ~/.claudeへのシンボリックリンク
+└── personal/                 ← ~/.claudeへのシンボリックリンク
 ```
 
 切り替え時、`cc-swap`は`CLAUDE_CONFIG_DIR`をアカウントフォルダに設定してClaude Codeを起動します。
@@ -218,17 +196,6 @@ cc-swap list
 | `cc-swap list` | 全アカウントを表示 |
 | `cc-swap remove <名前>` | アカウントを削除 |
 
-### アカウントごとのカスタマイズ
-
-デフォルトでは各アカウントは`~/.claude`の設定を共有します。カスタマイズするには：
-
-```bash
-# 例：「work」アカウント用のsettingsをカスタマイズ
-cd ~/.cc-swap/claude-accounts/work
-rm settings.json                           # シンボリックリンクを削除
-cp ~/.claude/settings.json settings.json   # コピーして編集
-```
-
 ### 設定
 
 `~/.cc-swap/config.json`は初回使用時に自動作成されます。編集してカスタマイズ：
@@ -260,8 +227,8 @@ cp ~/.claude/settings.json settings.json   # コピーして編集
 ```
 ~/.claude/                    ← 기본 설정 (수정되지 않음)
 ~/.cc-swap/accounts/
-├── work/                     ← ~/.claude로의 심볼릭 링크 + 커스텀 설정
-└── personal/                 ← ~/.claude로의 심볼릭 링크 + 커스텀 설정
+├── work/                     ← ~/.claude로의 심볼릭 링크
+└── personal/                 ← ~/.claude로의 심볼릭 링크
 ```
 
 전환 시 `cc-swap`는 `CLAUDE_CONFIG_DIR`을 계정 폴더로 설정하고 Claude Code를 실행합니다.
@@ -299,17 +266,6 @@ cc-swap list
 | `cc-swap list` | 전체 계정 표시 |
 | `cc-swap remove <이름>` | 계정 삭제 |
 
-### 계정별 커스터마이징
-
-기본적으로 각 계정은 `~/.claude`의 설정을 공유합니다. 커스터마이징하려면:
-
-```bash
-# 예: "work" 계정의 settings 커스터마이징
-cd ~/.cc-swap/claude-accounts/work
-rm settings.json                           # 심볼릭 링크 삭제
-cp ~/.claude/settings.json settings.json   # 복사 후 편집
-```
-
 ### 설정
 
 `~/.cc-swap/config.json`은 처음 사용할 때 자동으로 생성됩니다. 편집하여 커스터마이징:
@@ -341,8 +297,8 @@ cp ~/.claude/settings.json settings.json   # 복사 후 편집
 ```
 ~/.claude/                    ← 基础配置（永不修改）
 ~/.cc-swap/accounts/
-├── work/                     ← 指向 ~/.claude 的符号链接 + 自定义配置
-└── personal/                 ← 指向 ~/.claude 的符号链接 + 自定义配置
+├── work/                     ← 指向 ~/.claude 的符号链接
+└── personal/                 ← 指向 ~/.claude 的符号链接
 ```
 
 切换时，`cc-swap` 将 `CLAUDE_CONFIG_DIR` 设置为账户目录并启动 Claude Code。
@@ -379,17 +335,6 @@ cc-swap list
 | `cc-swap switch <名称>` | 切换到指定账户 + 启动 |
 | `cc-swap list` | 显示所有账户 |
 | `cc-swap remove <名称>` | 删除账户 |
-
-### 账户自定义
-
-默认情况下，每个账户与 `~/.claude` 共享所有配置。如需自定义：
-
-```bash
-# 例：为 "work" 账户自定义 settings
-cd ~/.cc-swap/claude-accounts/work
-rm settings.json                           # 删除符号链接
-cp ~/.claude/settings.json settings.json   # 复制并编辑
-```
 
 ### 配置
 
