@@ -18,7 +18,7 @@ import {
   nextAccount,
 } from "./accounts.js";
 import { readCurrent } from "./symlink.js";
-import { loadConfig, saveConfig, DEFAULT_ITEMS, type Config } from "./items.js";
+import { loadConfig, type Config } from "./items.js";
 
 function launchClaude(accountDir: string, config: Config): void {
   if (process.env.CC_SWITCH_NO_LAUNCH) return;
@@ -162,16 +162,6 @@ program
     const config = await loadConfig(CONFIG_FILE);
     console.log(JSON.stringify(config, null, 2));
     console.log(`\nConfig file: ${CONFIG_FILE}`);
-  });
-
-program
-  .command("init")
-  .description("Create default config.json")
-  .action(async () => {
-    const config = { syncItems: [...DEFAULT_ITEMS], autoContinue: true };
-    await saveConfig(CONFIG_FILE, config);
-    console.log(`Config created: ${CONFIG_FILE}`);
-    console.log(JSON.stringify(config, null, 2));
   });
 
 program.parseAsync();

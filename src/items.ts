@@ -26,7 +26,7 @@ const DEFAULT_CONFIG: Config = {
   autoContinue: true,
 };
 
-/** Load config from config.json. Returns defaults if file doesn't exist. */
+/** Load config from config.json. Auto-creates with defaults if file doesn't exist. */
 export async function loadConfig(configFile: string): Promise<Config> {
   try {
     const raw = await fsPromises.readFile(configFile, "utf-8");
@@ -36,7 +36,12 @@ export async function loadConfig(configFile: string): Promise<Config> {
       autoContinue: parsed.autoContinue !== false,
     };
   } catch {
-    return { ...DEFAULT_CONFIG };
+    const config = { ...DEFAULT_CONFIG, syncItems: [...DEFAULT_ITEMS] };
+    // Auto-create config file (ensure parent dir exists)
+    const dir = configFile.substring(0, configFile.lastIndexOf("/"));
+    await fsPromises.mkdir(dir, { recursive: true, mode: 0o700 }).catch(() => undefined);
+    await saveConfig(configFile, config);
+    return config;
   }
 }
 
