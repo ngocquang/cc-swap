@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s https://raw.githubusercontent.com/kaitranntt/ccs/main/README.md)",
+      "Bash(curl:*)",
+      "Bash(git:*)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:registry.npmjs.org)",
+      "Bash(sudo chown:*)",
+      "Bash(npm install:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run:*)",
+      "Bash(npm link:*)",
+      "Bash(cc-switch --help)",
+      "Bash(npm bin:*)",
+      "Bash(/usr/local/bin/cc-switch --help 2>&1)",
+      "WebFetch(domain:api.anthropic.com)",
+      "WebFetch(domain:mcp.vercel.com)",
+      "WebFetch(domain:http-intake.logs.us5.datadoghq.com)",
+      "WebFetch(domain:mcp-proxy.anthropic.com)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
+  }
+}

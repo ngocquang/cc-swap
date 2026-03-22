@@ -20,9 +20,15 @@ describe("CLI integration", () => {
 
   beforeEach(() => {
     tmp = fs.mkdtempSync(path.join(os.tmpdir(), "cc-switch-cli-"));
+    // Create fake ~/.claude with some items
+    const claudeDir = path.join(tmp, ".claude");
+    fs.mkdirSync(claudeDir);
+    fs.mkdirSync(path.join(claudeDir, "hooks"));
+    fs.writeFileSync(path.join(claudeDir, "settings.json"), "{}");
+
     testEnv = {
       CC_SWITCH_HOME: tmp,
-      CC_SWITCH_CLAUDE_DIR: path.join(tmp, ".claude"),
+      CC_SWITCH_CLAUDE_DIR: claudeDir,
       CC_SWITCH_NO_LAUNCH: "1",
     };
   });
@@ -36,25 +42,25 @@ describe("CLI integration", () => {
     expect(out).toMatch(/no accounts/i);
   });
 
-  it("add creates first account and default", () => {
-    fs.mkdirSync(path.join(tmp, ".claude"));
+  it("add creates account with symlinks to ~/.claude", () => {
     const out = run(["add", "work"], testEnv);
     expect(out).toMatch(/added.*work/i);
+
     const listOut = run(["list"], testEnv);
-    expect(listOut).toContain("default");
     expect(listOut).toContain("work");
+    expect(listOut).toContain("active");
   });
 
   it("switch changes active account", () => {
-    fs.mkdirSync(path.join(tmp, ".claude"));
     run(["add", "work"], testEnv);
-    const out = run(["switch", "work"], testEnv);
-    expect(out).toMatch(/switched to.*work/i);
+    run(["add", "personal"], testEnv);
+    const out = run(["switch", "personal"], testEnv);
+    expect(out).toMatch(/switched to.*personal/i);
   });
 
   it("no-args round-robin switches to next", () => {
-    fs.mkdirSync(path.join(tmp, ".claude"));
     run(["add", "work"], testEnv);
+    run(["add", "personal"], testEnv);
     const out = run([], testEnv);
     expect(out).toMatch(/switched/i);
   });
@@ -63,8 +69,8 @@ describe("CLI integration", () => {
     expect(() => run(["switch", "nonexistent"], testEnv)).toThrow();
   });
 
-  it("add 'default' as first account name exits with code 1", () => {
-    fs.mkdirSync(path.join(tmp, ".claude"));
-    expect(() => run(["add", "default"], testEnv)).toThrow();
+  it("add duplicate name exits with code 1", () => {
+    run(["add", "work"], testEnv);
+    expect(() => run(["add", "work"], testEnv)).toThrow();
   });
 });

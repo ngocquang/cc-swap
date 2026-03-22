@@ -1,14 +1,8 @@
 import { Command } from "commander";
 import { spawnSync } from "node:child_process";
+import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
-
-function launchClaude(): void {
-  if (process.env.CC_SWITCH_NO_LAUNCH) return;
-  console.log("Launching Claude Code...\n");
-  const result = spawnSync("claude", [], { stdio: "inherit" });
-  process.exit(result.status ?? 0);
-}
 import {
   CLAUDE_DIR,
   CC_SWITCH_DIR,
@@ -24,6 +18,16 @@ import {
 } from "./accounts.js";
 import { readCurrent } from "./symlink.js";
 
+function launchClaude(accountDir: string): void {
+  if (process.env.CC_SWITCH_NO_LAUNCH) return;
+  console.log(`Launching Claude Code (config: ${accountDir})...\n`);
+  const result = spawnSync("claude", [], {
+    stdio: "inherit",
+    env: { ...process.env, CLAUDE_CONFIG_DIR: accountDir },
+  });
+  process.exit(result.status ?? 0);
+}
+
 const program = new Command();
 
 program
@@ -31,6 +35,7 @@ program
   .description("Switch between multiple Claude Code accounts")
   .version("0.1.0");
 
+// Default action (no subcommand) → round-robin to next account + launch
 program.action(async () => {
   const accounts = await listAccounts(ACCOUNTS_DIR);
   if (accounts.length === 0) {
@@ -56,12 +61,12 @@ program.action(async () => {
     currentFile: CURRENT_FILE,
   });
   console.log(`Switched: ${current} → ${next}`);
-  launchClaude();
+  launchClaude(path.join(ACCOUNTS_DIR, next));
 });
 
 program
   .command("add <name>")
-  .description("Add a new account")
+  .description("Add a new account (populated with symlinks to ~/.claude)")
   .action(async (name: string) => {
     try {
       await addAccount(name, {
@@ -79,7 +84,7 @@ program
 
 program
   .command("switch <name>")
-  .description("Switch to a specific account")
+  .description("Switch to a specific account and launch Claude Code")
   .action(async (name: string) => {
     try {
       const msg = await switchAccount(name, {
@@ -89,7 +94,7 @@ program
       });
       console.log(msg);
       if (!msg.includes("already active")) {
-        launchClaude();
+        launchClaude(path.join(ACCOUNTS_DIR, name));
       }
     } catch (err: unknown) {
       console.error(`Error: ${(err as Error).message}`);

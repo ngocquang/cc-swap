@@ -3,13 +3,13 @@ import fs from "node:fs";
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
-import { switchItems, moveItemsToAccount, readCurrent, writeCurrent } from "../src/symlink.js";
+import { populateAccount, readCurrent, writeCurrent } from "../src/symlink.js";
 
 function makeTmpDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "cc-switch-test-"));
 }
 
-describe("switchItems", () => {
+describe("populateAccount", () => {
   let tmp: string;
   let claudeDir: string;
   let accountDir: string;
@@ -19,117 +19,74 @@ describe("switchItems", () => {
     claudeDir = path.join(tmp, ".claude");
     accountDir = path.join(tmp, "account-work");
     fs.mkdirSync(claudeDir);
-    fs.mkdirSync(accountDir);
   });
 
   afterEach(() => {
     fs.rmSync(tmp, { recursive: true, force: true });
   });
 
-  it("creates symlinks for items that exist in account", async () => {
-    fs.mkdirSync(path.join(accountDir, "hooks"));
-    fs.mkdirSync(path.join(accountDir, "plugins"));
-
-    await switchItems(claudeDir, accountDir);
-
-    expect(fs.readlinkSync(path.join(claudeDir, "hooks"))).toBe(path.join(accountDir, "hooks"));
-    expect(fs.readlinkSync(path.join(claudeDir, "plugins"))).toBe(path.join(accountDir, "plugins"));
-  });
-
-  it("skips items that do not exist in account", async () => {
-    fs.mkdirSync(path.join(accountDir, "hooks"));
-    // "plugins" does not exist in account
-
-    await switchItems(claudeDir, accountDir);
-
-    expect(fs.existsSync(path.join(claudeDir, "plugins"))).toBe(false);
-  });
-
-  it("replaces existing symlinks", async () => {
-    const otherDir = path.join(tmp, "other");
-    fs.mkdirSync(otherDir);
-    fs.mkdirSync(path.join(otherDir, "hooks"));
-    fs.mkdirSync(path.join(accountDir, "hooks"));
-
-    // Create initial symlink
-    fs.symlinkSync(path.join(otherDir, "hooks"), path.join(claudeDir, "hooks"));
-
-    await switchItems(claudeDir, accountDir);
-
-    expect(fs.readlinkSync(path.join(claudeDir, "hooks"))).toBe(path.join(accountDir, "hooks"));
-  });
-
-  it("does not overwrite real (non-symlink) items", async () => {
+  it("creates symlinks in account dir pointing back to claude dir", async () => {
     fs.mkdirSync(path.join(claudeDir, "hooks"));
-    fs.writeFileSync(path.join(claudeDir, "hooks", "keep.txt"), "data");
+    fs.mkdirSync(path.join(claudeDir, "plugins"));
+
+    await populateAccount(claudeDir, accountDir);
+
+    // Account items are symlinks pointing to ~/.claude
+    expect(fs.readlinkSync(path.join(accountDir, "hooks"))).toBe(path.join(claudeDir, "hooks"));
+    expect(fs.readlinkSync(path.join(accountDir, "plugins"))).toBe(path.join(claudeDir, "plugins"));
+  });
+
+  it("skips items that do not exist in claude dir", async () => {
+    fs.mkdirSync(path.join(claudeDir, "hooks"));
+    // "plugins" does not exist in claudeDir
+
+    await populateAccount(claudeDir, accountDir);
+
+    expect(fs.existsSync(path.join(accountDir, "plugins"))).toBe(false);
+    expect(fs.readlinkSync(path.join(accountDir, "hooks"))).toBe(path.join(claudeDir, "hooks"));
+  });
+
+  it("does not overwrite existing items in account (custom overrides)", async () => {
+    fs.mkdirSync(path.join(claudeDir, "hooks"));
+    fs.mkdirSync(accountDir);
+    // Account has its own custom hooks (override)
     fs.mkdirSync(path.join(accountDir, "hooks"));
+    fs.writeFileSync(path.join(accountDir, "hooks", "custom.sh"), "#!/bin/bash");
 
-    await switchItems(claudeDir, accountDir);
+    await populateAccount(claudeDir, accountDir);
 
-    // Real dir should still be there, not replaced
-    expect(fs.lstatSync(path.join(claudeDir, "hooks")).isSymbolicLink()).toBe(false);
-    expect(fs.existsSync(path.join(claudeDir, "hooks", "keep.txt"))).toBe(true);
+    // Should NOT be a symlink — the custom override is preserved
+    expect(fs.lstatSync(path.join(accountDir, "hooks")).isSymbolicLink()).toBe(false);
+    expect(fs.existsSync(path.join(accountDir, "hooks", "custom.sh"))).toBe(true);
   });
 
   it("handles settings.json as file symlink", async () => {
-    fs.writeFileSync(path.join(accountDir, "settings.json"), '{"test":true}');
+    fs.writeFileSync(path.join(claudeDir, "settings.json"), '{"test":true}');
 
-    await switchItems(claudeDir, accountDir);
+    await populateAccount(claudeDir, accountDir);
 
-    expect(fs.readlinkSync(path.join(claudeDir, "settings.json"))).toBe(
-      path.join(accountDir, "settings.json")
+    expect(fs.readlinkSync(path.join(accountDir, "settings.json"))).toBe(
+      path.join(claudeDir, "settings.json")
     );
-  });
-});
-
-describe("moveItemsToAccount", () => {
-  let tmp: string;
-  let claudeDir: string;
-  let accountDir: string;
-
-  beforeEach(() => {
-    tmp = makeTmpDir();
-    claudeDir = path.join(tmp, ".claude");
-    accountDir = path.join(tmp, "account-default");
-    fs.mkdirSync(claudeDir);
-  });
-
-  afterEach(() => {
-    fs.rmSync(tmp, { recursive: true, force: true });
-  });
-
-  it("moves real items from claude dir to account dir", async () => {
-    fs.mkdirSync(path.join(claudeDir, "hooks"));
-    fs.writeFileSync(path.join(claudeDir, "hooks", "test.sh"), "#!/bin/bash");
-    fs.writeFileSync(path.join(claudeDir, "settings.json"), "{}");
-
-    await moveItemsToAccount(claudeDir, accountDir);
-
-    expect(fs.existsSync(path.join(accountDir, "hooks", "test.sh"))).toBe(true);
-    expect(fs.existsSync(path.join(accountDir, "settings.json"))).toBe(true);
-    // Original should be gone (moved)
-    expect(fs.existsSync(path.join(claudeDir, "hooks"))).toBe(false);
-    expect(fs.existsSync(path.join(claudeDir, "settings.json"))).toBe(false);
-  });
-
-  it("skips symlinks (does not move them)", async () => {
-    const elsewhere = path.join(tmp, "elsewhere");
-    fs.mkdirSync(elsewhere);
-    fs.symlinkSync(elsewhere, path.join(claudeDir, "hooks"));
-
-    await moveItemsToAccount(claudeDir, accountDir);
-
-    // Symlink should still be in claudeDir
-    expect(fs.lstatSync(path.join(claudeDir, "hooks")).isSymbolicLink()).toBe(true);
-    expect(fs.existsSync(path.join(accountDir, "hooks"))).toBe(false);
   });
 
   it("creates account dir if it does not exist", async () => {
-    fs.mkdirSync(path.join(claudeDir, "plugins"));
+    fs.mkdirSync(path.join(claudeDir, "hooks"));
 
-    await moveItemsToAccount(claudeDir, accountDir);
+    await populateAccount(claudeDir, accountDir);
 
     expect(fs.existsSync(accountDir)).toBe(true);
+  });
+
+  it("does not touch ~/.claude (source of truth)", async () => {
+    fs.mkdirSync(path.join(claudeDir, "hooks"));
+    fs.writeFileSync(path.join(claudeDir, "settings.json"), "{}");
+
+    await populateAccount(claudeDir, accountDir);
+
+    // ~/.claude items are still real, not symlinks
+    expect(fs.lstatSync(path.join(claudeDir, "hooks")).isSymbolicLink()).toBe(false);
+    expect(fs.lstatSync(path.join(claudeDir, "settings.json")).isSymbolicLink()).toBe(false);
   });
 });
 

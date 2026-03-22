@@ -1,7 +1,7 @@
 import fsPromises from "node:fs/promises";
 import path from "node:path";
 import { validateName } from "./validate.js";
-import { switchItems, moveItemsToAccount, readCurrent, writeCurrent } from "./symlink.js";
+import { populateAccount, readCurrent, writeCurrent } from "./symlink.js";
 
 interface AccountPaths {
   claudeDir: string;
@@ -34,35 +34,26 @@ export async function addAccount(name: string, paths: AccountPaths): Promise<voi
   const nameErr = validateName(name);
   if (nameErr) throw new Error(nameErr);
 
-  const isFirstTime = !(await fsPromises.access(accountsDir).then(() => true).catch(() => false));
+  const accountsExist = await fsPromises.access(accountsDir).then(() => true).catch(() => false);
 
-  if (isFirstTime) {
-    if (name === "default") {
-      throw new Error("'default' is reserved for your current Claude config during first-time setup");
-    }
-
+  if (!accountsExist) {
     await fsPromises.mkdir(accountsDir, { recursive: true, mode: 0o700 });
     if (ccSwitchDir) {
       await fsPromises.chmod(ccSwitchDir, 0o700);
     }
+  }
 
-    const defaultDir = path.join(accountsDir, "default");
+  const target = path.join(accountsDir, name);
+  const exists = await fsPromises.access(target).then(() => true).catch(() => false);
+  if (exists) throw new Error(`Account '${name}' already exists`);
 
-    // Move real items from ~/.claude into default account
-    await moveItemsToAccount(claudeDir, defaultDir);
+  // Create account dir with symlinks pointing back to ~/.claude
+  await populateAccount(claudeDir, target);
 
-    // Create symlinks from ~/.claude/<item> → default/<item>
-    await switchItems(claudeDir, defaultDir);
-
-    await writeCurrent(currentFile, "default");
-
-    // Create empty new account directory
-    await fsPromises.mkdir(path.join(accountsDir, name), { mode: 0o700 });
-  } else {
-    const target = path.join(accountsDir, name);
-    const exists = await fsPromises.access(target).then(() => true).catch(() => false);
-    if (exists) throw new Error(`Account '${name}' already exists`);
-    await fsPromises.mkdir(target, { mode: 0o700 });
+  // Set as current if this is the first account
+  const current = await readCurrent(currentFile);
+  if (!current) {
+    await writeCurrent(currentFile, name);
   }
 }
 
@@ -70,7 +61,7 @@ export async function switchAccount(
   name: string,
   paths: Pick<AccountPaths, "claudeDir" | "accountsDir" | "currentFile">
 ): Promise<string> {
-  const { claudeDir, accountsDir, currentFile } = paths;
+  const { accountsDir, currentFile } = paths;
   const target = path.join(accountsDir, name);
 
   const exists = await fsPromises.access(target).then(() => true).catch(() => false);
@@ -79,8 +70,6 @@ export async function switchAccount(
   const current = await readCurrent(currentFile);
   if (current === name) return `'${name}' is already active`;
 
-  // Switch all items inside ~/.claude to point to the new account
-  await switchItems(claudeDir, target);
   await writeCurrent(currentFile, name);
   return `Switched to: ${name}`;
 }
