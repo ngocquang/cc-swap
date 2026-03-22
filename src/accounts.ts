@@ -61,6 +61,9 @@ export async function switchAccount(
   name: string,
   paths: Pick<AccountPaths, "claudeDir" | "accountsDir" | "currentFile">
 ): Promise<string> {
+  const nameErr = validateName(name);
+  if (nameErr) throw new Error(nameErr);
+
   const { accountsDir, currentFile } = paths;
   const target = path.join(accountsDir, name);
 
@@ -78,6 +81,9 @@ export async function removeAccount(
   name: string,
   paths: Pick<AccountPaths, "accountsDir" | "currentFile">
 ): Promise<void> {
+  const nameErr = validateName(name);
+  if (nameErr) throw new Error(nameErr);
+
   const { accountsDir, currentFile } = paths;
   const target = path.join(accountsDir, name);
 
