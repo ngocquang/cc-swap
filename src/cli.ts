@@ -21,7 +21,7 @@ import { readCurrent } from "./symlink.js";
 function launchClaude(accountDir: string): void {
   if (process.env.CC_SWITCH_NO_LAUNCH) return;
   console.log(`Launching Claude Code (config: ${accountDir})...\n`);
-  const result = spawnSync("claude", [], {
+  const result = spawnSync("claude", ["--continue"], {
     stdio: "inherit",
     env: { ...process.env, CLAUDE_CONFIG_DIR: accountDir },
   });
