@@ -85,7 +85,7 @@ cc-swap list
 ### Cách hoạt động
 
 ```
-~/.claude/                    ← Config gốc (không bao giờ bị sửa)
+~/.claude/                    ← Config gốc
 ~/.cc-swap/accounts/
 ├── work/                     ← Symlinks trỏ về ~/.claude
 └── personal/                 ← Symlinks trỏ về ~/.claude
